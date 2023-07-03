@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Alura.ByteBank.Dados.Migrations
 {
     [DbContext(typeof(ByteBankContexto))]
-    [Migration("20230627003744_PopularBancoByteBank")]
+    [Migration("20211029183650_PopularBancoByteBank")]
     partial class PopularBancoByteBank
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

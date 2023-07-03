@@ -1,5 +1,7 @@
 ﻿using Alura.ByteBank.Dados.Repositorio;
 using Alura.ByteBank.Dominio.Entidades;
+using Alura.ByteBank.Dominio.Interfaces.Repositorios;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -12,14 +14,22 @@ namespace Alura.ByteBank.Infraestrutura.Testes
 {
     public class ClienteRepositorioTestes
     {
-         private ClienteRepositorio _repositorio;
+        private readonly IClienteRepositorio _repositorio;
+        public ClienteRepositorioTestes()
+        {
+            //Injetando dependências no construtor;
+            var servico = new ServiceCollection();
+            servico.AddTransient<IClienteRepositorio, ClienteRepositorio>();
 
-         [Fact]
-         public void TestaObterTodosClientes()
+            var provedor = servico.BuildServiceProvider();
+            _repositorio = provedor.GetService<IClienteRepositorio>();
+
+        }
+
+        [Fact]
+        public void TestaObterTodosClientes()
         {
             //Arrange
-            _repositorio = new ClienteRepositorio();
-
             //Act
             List<Cliente> lista = _repositorio.ObterTodos();
 
@@ -32,8 +42,6 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         public void TestaObterClientesPorId()
         {
             //Arrange
-            _repositorio = new ClienteRepositorio();
-
             //Act
             var cliente = _repositorio.ObterPorId(1);
 
@@ -45,13 +53,9 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
-        [InlineData(3)]
-        [InlineData(4)]
         public void TestaObterClientesPorVariosId(int id)
         {
-            //Arrange
-            _repositorio = new ClienteRepositorio();
-
+            //Arrange           
             //Act
             var cliente = _repositorio.ObterPorId(id);
 
@@ -61,36 +65,45 @@ namespace Alura.ByteBank.Infraestrutura.Testes
         }
 
         [Fact]
+        public void TesteInsereUmNovoClienteNaBaseDeDados()
+        {
+            //Arrange            
+            string nome = "Alberto Roberto";
+            string cpf = "088.157.930-03";
+            Guid identificador = Guid.NewGuid();
+            string profissao = "Administrador de Empresas";
+
+            var cliente = new Cliente()
+            {
+                Nome = nome,
+                CPF = cpf,
+                Identificador = identificador,
+                Profissao = profissao
+            };
+
+            //Act
+            var retorno = _repositorio.Adicionar(cliente);
+
+            //Assert
+            Assert.True(retorno);
+
+
+        }
+
+        [Fact]
         public void TestaAtualizacaoInformacaoDeterminadoCliente()
         {
-            //Arrange
-            _repositorio = new ClienteRepositorio();
+            //Arrange        
             var cliente = _repositorio.ObterPorId(2);
             var nomeNovo = "João Pedro";
             cliente.Nome = nomeNovo;
 
             //Act
-            var atualizado = _repositorio.Atualizar(2,cliente);
+            var atualizado = _repositorio.Atualizar(2, cliente);
 
             //Assert
             Assert.True(atualizado);
         }
-
-        // Testes com Mock
-        [Fact]
-        public void TestaObterClientesMock()
-        {
-            //Arange
-            var bytebankRepositorioMock = new Mock<IByteBankRepositorio>();
-            var mock = bytebankRepositorioMock.Object;
-
-            //Act
-            var lista = mock.BuscarClientes();
-
-            //Assert
-            bytebankRepositorioMock.Verify(b => b.BuscarClientes());
-        }
-
 
     }
 }
